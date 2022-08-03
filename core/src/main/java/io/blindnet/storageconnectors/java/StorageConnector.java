@@ -1,26 +1,31 @@
 package io.blindnet.storageconnectors.java;
 
-import org.slf4j.LoggerFactory;
+import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
+import io.blindnet.storageconnectors.java.handlers.DataQueryHandler;
+import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class StorageConnector {
-    private final WebSocketClientImpl ws;
-
-    public static StorageConnector create(String endpoint) throws URISyntaxException {
+public interface StorageConnector {
+    static StorageConnector create(String endpoint) throws URISyntaxException {
         return create(new URI(endpoint));
     }
 
-    public static StorageConnector create(URI endpoint) {
-        return new StorageConnector(endpoint);
+    static StorageConnector create(URI endpoint) {
+        return new StorageConnectorImpl(endpoint);
     }
 
-    private StorageConnector(URI endpoint) {
-        ws = new WebSocketClientImpl(endpoint);
-    }
+    DataQueryHandler getDataQueryHandler();
 
-    public void start() throws InterruptedException {
-        LoggerFactory.getLogger(StorageConnector.class).info("r=" + ws.connectBlocking());
-    }
+    StorageConnector setDataQueryHandler(DataQueryHandler dataQueryHandler);
+
+    ErrorHandler getErrorHandler();
+
+    StorageConnector setErrorHandler(ErrorHandler errorHandler);
+
+    void start();
+
+    void startBlocking() throws IOException, InterruptedException;
 }
