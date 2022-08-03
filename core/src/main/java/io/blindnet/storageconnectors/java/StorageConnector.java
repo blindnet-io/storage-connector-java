@@ -21,6 +21,6 @@ public class StorageConnector {
     }
 
     public void start() throws InterruptedException {
-        LoggerFactory.getLogger(Main.class).info("r=" + ws.connectBlocking());
+        LoggerFactory.getLogger(StorageConnector.class).info("r=" + ws.connectBlocking());
     }
 }

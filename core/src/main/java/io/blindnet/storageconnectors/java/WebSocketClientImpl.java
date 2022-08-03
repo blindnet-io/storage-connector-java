@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
-public class WebSocketClientImpl extends WebSocketClient {
+class WebSocketClientImpl extends WebSocketClient {
     public WebSocketClientImpl(URI serverUri) {
         super(serverUri);
     }
@@ -17,6 +17,7 @@ public class WebSocketClientImpl extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        LoggerFactory.getLogger(WebSocketClientImpl.class).info("msg: " + message);
     }
 
     @Override
