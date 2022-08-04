@@ -1,5 +1,6 @@
 package io.blindnet.storageconnectors.java.dataquery;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
 import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReplyBuilder;
@@ -9,6 +10,7 @@ import io.blindnet.storageconnectors.java.logic.DataQueryLogic;
 import java.time.Instant;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataQueryImpl implements DataQuery {
     private List<String> selectors;
     private List<String> subjects;

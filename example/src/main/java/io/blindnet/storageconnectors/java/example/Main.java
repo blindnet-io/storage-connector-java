@@ -17,8 +17,6 @@ public class Main {
         StorageConnector.create("ws://127.0.0.1:8028/v1/connectors/ws")
                 .setDataQueryHandler(new MyQueryHandler())
                 .start();
-
-        LoggerFactory.getLogger(Main.class).info("hey");
     }
 
     static class MyQueryHandler implements DataQueryHandler {

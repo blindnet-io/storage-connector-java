@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class StorageConnectorImpl extends WebSocketClient implements StorageConnector {
     private final static Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
@@ -28,7 +31,10 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     private DataQueryHandler dataQueryHandler = new DefaultDataQueryHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
+    private final Random random = new Random();
     private final ObjectMapper objectMapper;
+
+    private long retryDelay = 1;
 
     StorageConnectorImpl(URI endpoint) {
         super(endpoint);
@@ -72,7 +78,18 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
-    public void onOpen(ServerHandshake handshake) {}
+    public void connect() {
+        logger.info("Connecting to WebSocket");
+
+        super.connect();
+    }
+
+    @Override
+    public void onOpen(ServerHandshake handshake) {
+        logger.info("WebSocket connection established");
+
+        retryDelay = 1;
+    }
 
     @Override
     public void onMessage(String message) {
@@ -90,7 +107,15 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        // TODO
+        logger.error("WebSocket connection closed, reconnecting in " + (retryDelay / 1000) + "s");
+
+        Executors.newSingleThreadScheduledExecutor()
+                .schedule(this::reconnect, retryDelay, TimeUnit.MILLISECONDS);
+
+        if(!System.getenv().containsKey("DISABLE_RETRY_BACKOFF")) {
+            if(retryDelay < 15000)
+                retryDelay += random.nextInt(1000);
+        }
     }
 
     @Override
