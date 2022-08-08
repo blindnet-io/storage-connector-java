@@ -7,6 +7,7 @@ import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
 
 public interface StorageConnector {
     static StorageConnector create(String endpoint) throws URISyntaxException {
@@ -24,6 +25,10 @@ public interface StorageConnector {
     ErrorHandler getErrorHandler();
 
     StorageConnector setErrorHandler(ErrorHandler errorHandler);
+
+    ExecutorService getExecutorService();
+
+    StorageConnector setExecutorService(ExecutorService executorService);
 
     void start();
 

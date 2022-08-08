@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +32,7 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     private DataQueryHandler dataQueryHandler = new DefaultDataQueryHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
+    private ExecutorService executorService = Executors.newCachedThreadPool();
 
     private final Random random = new Random();
     private final ObjectMapper objectMapper;
@@ -67,6 +70,17 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    @Override
+    public StorageConnector setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
+        return this;
+    }
+
+    @Override
     public void start() {
         connect();
     }
@@ -92,17 +106,22 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
-    public void onMessage(String message) {
-        logger.info("in: " + message);
+    public void onMessage(ByteBuffer buf) {
+        logger.info("in: " + new String(buf.array()));
 
         try {
-            WsInPayload payload = objectMapper.readValue(message, WsInPayload.class);
+            WsInPayload payload = objectMapper.readValue(buf.array(), WsInPayload.class);
             WsInPacket packet = payload.toPacket(objectMapper);
             Logic logic = packet.getLogic(this);
             logic.run();
         } catch (IOException e) {
             errorHandler.onError(new WebSocketException(e));
         }
+    }
+
+    @Override
+    public void onMessage(String message) {
+        onMessage(ByteBuffer.wrap(message.getBytes()));
     }
 
     @Override
@@ -125,9 +144,17 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     public <T extends WsOutPacket> void sendPacket(T packet) throws WebSocketException {
         try {
-            String message = objectMapper.writeValueAsString(new WsOutPayload<T>(packet.getPacketType(), packet));
-            logger.info("out: " + message);
-            send(message);
+            byte[] packetBytes = objectMapper.writeValueAsBytes(new WsOutPayload<T>(packet.getPacketType(), packet));
+            byte[] packetData = packet.getData();
+
+            ByteBuffer buf = ByteBuffer.allocate(4 + packetBytes.length + (packetData != null ? packetData.length : 0));
+            buf.putInt(packetBytes.length);
+            buf.put(packetBytes);
+            if(packetData != null) buf.put(packetData);
+            buf.position(0);
+
+            logger.info("out: " + new String(buf.array()));
+            send(buf);
         } catch (JsonProcessingException e) {
             throw new WebSocketException(e);
         }

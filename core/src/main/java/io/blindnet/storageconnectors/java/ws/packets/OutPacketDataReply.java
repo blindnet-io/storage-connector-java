@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReplyImpl;
 import io.blindnet.storageconnectors.java.ws.WsOutPacket;
 
-public class OutPacketDataReply implements WsOutPacket {
+public class OutPacketDataReply extends WsOutPacket {
     @JsonProperty("request_id")
     private final String requestId;
     private final DataQueryReplyImpl.Type type;
