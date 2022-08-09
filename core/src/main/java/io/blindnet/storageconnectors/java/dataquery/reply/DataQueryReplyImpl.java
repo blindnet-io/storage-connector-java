@@ -1,10 +1,10 @@
 package io.blindnet.storageconnectors.java.dataquery.reply;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class DataQueryReplyImpl implements DataQueryReply {
     private final Type type;
-    private CompletableFuture<byte[]> data;
+    private Consumer<DataQueryCallback> dataCallbackConsumer;
 
     public DataQueryReplyImpl(Type type) {
         this.type = type;
@@ -16,12 +16,13 @@ public class DataQueryReplyImpl implements DataQueryReply {
     }
 
     @Override
-    public CompletableFuture<byte[]> getData() {
-        return data;
+    public Consumer<DataQueryCallback> getDataCallbackConsumer() {
+        return dataCallbackConsumer;
     }
 
-    public DataQueryReplyImpl setData(CompletableFuture<byte[]> data) {
-        this.data = data;
+    public DataQueryReply setDataCallbackConsumer(Consumer<DataQueryCallback> dataCallbackConsumer) {
+        this.dataCallbackConsumer = dataCallbackConsumer;
+
         return this;
     }
 }

@@ -7,14 +7,21 @@ public class OutPacketData extends WsOutPacket {
     @JsonProperty("request_id")
     private final String requestId;
 
-    public OutPacketData(String requestId, byte[] data) {
+    private final boolean last;
+
+    public OutPacketData(String requestId, byte[] data, boolean last) {
         super(data);
 
         this.requestId = requestId;
+        this.last = last;
     }
 
     public String getRequestId() {
         return requestId;
+    }
+
+    public boolean isLast() {
+        return last;
     }
 
     @Override

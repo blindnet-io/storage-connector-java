@@ -1,11 +1,11 @@
 package io.blindnet.storageconnectors.java.dataquery.reply;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public interface DataQueryReply {
     Type getType();
 
-    CompletableFuture<byte[]> getData();
+    Consumer<DataQueryCallback> getDataCallbackConsumer();
 
     enum Type {
         ACCEPT,

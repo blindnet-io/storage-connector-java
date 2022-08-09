@@ -7,7 +7,6 @@ import io.blindnet.storageconnectors.java.handlers.DataQueryHandler;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -32,10 +31,10 @@ public class Main {
                     return query.accept().withData("John Doe".getBytes());
                 case "IMAGE":
                     // Could take some time, we need some async processing.
-                    return query.accept().withDelayedData(future -> {
+                    return query.accept().withDelayedData(cb -> {
                         try (Response res = new OkHttpClient().newCall(new Request.Builder()
                                 .url("https://picsum.photos/seed/picsum/500").build()).execute()) {
-                            future.complete(Objects.requireNonNull(res.body()).bytes());
+                            cb.sendData(Objects.requireNonNull(res.body()).bytes());
                         } catch (IOException ignored) {} // Errors ain't nothing
                     });
             }

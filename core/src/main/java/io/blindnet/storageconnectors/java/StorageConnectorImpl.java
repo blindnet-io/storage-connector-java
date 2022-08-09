@@ -107,13 +107,11 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     @Override
     public void onMessage(ByteBuffer buf) {
-        logger.info("in: " + new String(buf.array()));
-
         try {
             WsInPayload payload = objectMapper.readValue(buf.array(), WsInPayload.class);
             WsInPacket packet = payload.toPacket(objectMapper);
             Logic logic = packet.getLogic(this);
-            logic.run();
+            getExecutorService().execute(logic::runCatch);
         } catch (IOException e) {
             errorHandler.onError(new WebSocketException(e));
         }
@@ -153,7 +151,6 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
             if(packetData != null) buf.put(packetData);
             buf.position(0);
 
-            logger.info("out: " + new String(buf.array()));
             send(buf);
         } catch (JsonProcessingException e) {
             throw new WebSocketException(e);

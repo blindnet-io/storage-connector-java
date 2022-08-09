@@ -15,4 +15,12 @@ public abstract class Logic {
     }
 
     public abstract void run() throws WebSocketException;
+
+    public void runCatch() {
+        try {
+            run();
+        } catch(Exception e) {
+            getConnector().onError(e);
+        }
+    }
 }
