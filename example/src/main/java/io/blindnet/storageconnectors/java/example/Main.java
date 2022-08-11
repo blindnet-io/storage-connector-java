@@ -1,9 +1,9 @@
 package io.blindnet.storageconnectors.java.example;
 
 import io.blindnet.storageconnectors.java.StorageConnector;
-import io.blindnet.storageconnectors.java.dataquery.DataQuery;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
-import io.blindnet.storageconnectors.java.handlers.DataQueryHandler;
+import io.blindnet.storageconnectors.java.datarequests.DataRequest;
+import io.blindnet.storageconnectors.java.datarequests.reply.DataRequestReply;
+import io.blindnet.storageconnectors.java.handlers.DataRequestHandler;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,24 +14,28 @@ import java.util.Objects;
 public class Main {
     public static void main(String[] args) throws Exception {
         StorageConnector.create("ws://127.0.0.1:8028/v1/connectors/ws")
-                .setDataQueryHandler(new MyQueryHandler())
+                .setDataRequestHandler(new MyRequestHandler())
                 .start();
     }
 
-    static class MyQueryHandler implements DataQueryHandler {
+    static class MyRequestHandler implements DataRequestHandler {
         @Override
-        public DataQueryReply get(DataQuery query) {
+        public DataRequestReply handle(DataRequest request) {
+            // We deny all deletion requests, for now
+            if(request.getAction() != DataRequest.Action.GET)
+                return request.deny();
+
             // For the sake of simplicity, we'll only handle the first selector, and only allow for name and image.
-            if(query.getSelectors().size() != 1) return query.deny();
-            String selector = query.getSelectors().get(0);
+            if(request.getQuery().getSelectors().size() != 1) return request.deny();
+            String selector = request.getQuery().getSelectors().get(0);
 
             switch(selector) {
                 case "NAME":
                     // That's easy, let's return the data right now.
-                    return query.accept().withData("John Doe".getBytes());
+                    return request.accept().withData("John Doe".getBytes());
                 case "IMAGE":
                     // Could take some time, we need some async processing.
-                    return query.accept().withDelayedData(cb -> {
+                    return request.accept().withDelayedData(cb -> {
                         try (Response res = new OkHttpClient().newCall(new Request.Builder()
                                 .url("https://picsum.photos/seed/picsum/500").build()).execute()) {
                             cb.sendData(Objects.requireNonNull(res.body()).bytes());
@@ -39,14 +43,8 @@ public class Main {
                     });
             }
 
-            // Unhandled query
-            return query.deny();
-        }
-
-        @Override
-        public DataQueryReply delete(DataQuery query) {
-            // We deny all deletion requests, for now
-            return query.deny();
+            // Unhandled request
+            return request.deny();
         }
     }
 }

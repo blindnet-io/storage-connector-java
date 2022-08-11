@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.blindnet.storageconnectors.java.exceptions.WebSocketException;
-import io.blindnet.storageconnectors.java.handlers.DataQueryHandler;
+import io.blindnet.storageconnectors.java.handlers.DataRequestHandler;
 import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
-import io.blindnet.storageconnectors.java.handlers.defaults.DefaultDataQueryHandler;
+import io.blindnet.storageconnectors.java.handlers.defaults.DefaultDataRequestHandler;
 import io.blindnet.storageconnectors.java.handlers.defaults.DefaultErrorHandler;
 import io.blindnet.storageconnectors.java.logic.Logic;
 import io.blindnet.storageconnectors.java.ws.WsInPacket;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class StorageConnectorImpl extends WebSocketClient implements StorageConnector {
     private final static Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
 
-    private DataQueryHandler dataQueryHandler = new DefaultDataQueryHandler();
+    private DataRequestHandler dataRequestHandler = new DefaultDataRequestHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -48,13 +48,13 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
-    public DataQueryHandler getDataQueryHandler() {
-        return dataQueryHandler;
+    public DataRequestHandler getDataRequestHandler() {
+        return dataRequestHandler;
     }
 
     @Override
-    public StorageConnectorImpl setDataQueryHandler(DataQueryHandler dataQueryHandler) {
-        this.dataQueryHandler = dataQueryHandler;
+    public StorageConnectorImpl setDataRequestHandler(DataRequestHandler dataRequestHandler) {
+        this.dataRequestHandler = dataRequestHandler;
         return this;
     }
 

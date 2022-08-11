@@ -1,12 +1,13 @@
 package io.blindnet.storageconnectors.java.logic;
 
 import io.blindnet.storageconnectors.java.StorageConnectorImpl;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryCallback;
+import io.blindnet.storageconnectors.java.datarequests.DataRequest;
+import io.blindnet.storageconnectors.java.datarequests.reply.DataRequestReply;
+import io.blindnet.storageconnectors.java.datarequests.reply.DataRequestCallback;
 import io.blindnet.storageconnectors.java.exceptions.WebSocketException;
-import io.blindnet.storageconnectors.java.ws.packets.InPacketDataQuery;
+import io.blindnet.storageconnectors.java.ws.packets.InPacketDataRequest;
 import io.blindnet.storageconnectors.java.ws.packets.OutPacketData;
-import io.blindnet.storageconnectors.java.ws.packets.OutPacketDataReply;
+import io.blindnet.storageconnectors.java.ws.packets.OutPacketDataRequestReply;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -16,9 +17,9 @@ import java.nio.ByteBuffer;
 public class DataQueryLogic extends Logic {
     private static final int MAX_BLOCK_SIZE = 4194304;
 
-    private final InPacketDataQuery packet;
+    private final InPacketDataRequest packet;
 
-    public DataQueryLogic(StorageConnectorImpl connector, InPacketDataQuery packet) {
+    public DataQueryLogic(StorageConnectorImpl connector, InPacketDataRequest packet) {
         super(connector);
 
         this.packet = packet;
@@ -26,22 +27,12 @@ public class DataQueryLogic extends Logic {
 
     @Override
     public void run() throws WebSocketException {
-        DataQueryReply reply;
-        switch (packet.getAction()) {
-            case GET:
-                reply = getConnector().getDataQueryHandler().get(packet.getQuery());
-                break;
-            case DELETE:
-                reply = getConnector().getDataQueryHandler().delete(packet.getQuery());
-                break;
-            default:
-                throw new WebSocketException("Unknown data query action");
-        }
+        DataRequestReply reply = getConnector().getDataRequestHandler().handle(packet.getRequest());
 
-        getConnector().sendPacket(new OutPacketDataReply(packet.getQuery().getRequestId(), reply.getType()));
+        getConnector().sendPacket(new OutPacketDataRequestReply(packet.getRequest().getRequestId(), reply.getType()));
 
-        if(packet.getAction() == InPacketDataQuery.Action.GET && reply.getDataCallbackConsumer() != null) {
-            reply.getDataCallbackConsumer().accept(new DataQueryCallback() {
+        if(packet.getRequest().getAction() == DataRequest.Action.GET && reply.getDataCallbackConsumer() != null) {
+            reply.getDataCallbackConsumer().accept(new DataRequestCallback() {
                 @Override
                 public void sendData(byte[] data) {
                     sendData(ByteBuffer.wrap(data));
@@ -55,7 +46,7 @@ public class DataQueryLogic extends Logic {
                                 byte[] block = new byte[Math.min(MAX_BLOCK_SIZE, data.remaining())];
                                 data.get(block);
 
-                                getConnector().sendPacket(new OutPacketData(packet.getQuery().getRequestId(), block, !data.hasRemaining()));
+                                getConnector().sendPacket(new OutPacketData(packet.getRequest().getRequestId(), block, !data.hasRemaining()));
                             } while(data.hasRemaining());
                         } catch (WebSocketException e) {
                             getConnector().onError(e);
@@ -76,7 +67,7 @@ public class DataQueryLogic extends Logic {
                                 eof = bis.read() == -1;
                                 bis.reset();
 
-                                getConnector().sendPacket(new OutPacketData(packet.getQuery().getRequestId(), block, eof));
+                                getConnector().sendPacket(new OutPacketData(packet.getRequest().getRequestId(), block, eof));
                             }
                         } catch(IOException e) {
                             getConnector().onError(e);

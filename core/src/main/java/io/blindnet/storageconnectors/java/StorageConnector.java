@@ -1,7 +1,6 @@
 package io.blindnet.storageconnectors.java;
 
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
-import io.blindnet.storageconnectors.java.handlers.DataQueryHandler;
+import io.blindnet.storageconnectors.java.handlers.DataRequestHandler;
 import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
 
 import java.io.IOException;
@@ -18,9 +17,9 @@ public interface StorageConnector {
         return new StorageConnectorImpl(endpoint);
     }
 
-    DataQueryHandler getDataQueryHandler();
+    DataRequestHandler getDataRequestHandler();
 
-    StorageConnector setDataQueryHandler(DataQueryHandler dataQueryHandler);
+    StorageConnector setDataRequestHandler(DataRequestHandler dataRequestHandler);
 
     ErrorHandler getErrorHandler();
 

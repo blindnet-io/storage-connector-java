@@ -1,16 +1,8 @@
-package io.blindnet.storageconnectors.java.dataquery;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReply;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReplyBuilder;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReplyImpl;
-import io.blindnet.storageconnectors.java.logic.DataQueryLogic;
+package io.blindnet.storageconnectors.java.datarequests.query;
 
 import java.time.Instant;
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataQueryImpl implements DataQuery {
     private List<String> selectors;
     private List<String> subjects;
@@ -18,8 +10,6 @@ public class DataQueryImpl implements DataQuery {
     private String target;
     private Instant after;
     private Instant until;
-    @JsonProperty("request_id")
-    private String requestId;
 
     @Override
     public List<String> getSelectors() {
@@ -73,24 +63,5 @@ public class DataQueryImpl implements DataQuery {
 
     public void setUntil(Instant until) {
         this.until = until;
-    }
-
-    @Override
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    @Override
-    public DataQueryReplyBuilder accept() {
-        return new DataQueryReplyBuilder();
-    }
-
-    @Override
-    public DataQueryReply deny() {
-        return new DataQueryReplyImpl(DataQueryReplyImpl.Type.DENY);
     }
 }

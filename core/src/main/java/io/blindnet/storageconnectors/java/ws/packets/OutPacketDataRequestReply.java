@@ -1,15 +1,15 @@
 package io.blindnet.storageconnectors.java.ws.packets;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.blindnet.storageconnectors.java.dataquery.reply.DataQueryReplyImpl;
+import io.blindnet.storageconnectors.java.datarequests.reply.DataRequestReplyImpl;
 import io.blindnet.storageconnectors.java.ws.WsOutPacket;
 
-public class OutPacketDataReply extends WsOutPacket {
+public class OutPacketDataRequestReply extends WsOutPacket {
     @JsonProperty("request_id")
     private final String requestId;
-    private final DataQueryReplyImpl.Type type;
+    private final DataRequestReplyImpl.Type type;
 
-    public OutPacketDataReply(String requestId, DataQueryReplyImpl.Type type) {
+    public OutPacketDataRequestReply(String requestId, DataRequestReplyImpl.Type type) {
         this.requestId = requestId;
         this.type = type;
     }
@@ -18,12 +18,12 @@ public class OutPacketDataReply extends WsOutPacket {
         return requestId;
     }
 
-    public DataQueryReplyImpl.Type getType() {
+    public DataRequestReplyImpl.Type getType() {
         return type;
     }
 
     @Override
     public String getPacketType() {
-        return "data_reply";
+        return "data_request_reply";
     }
 }
