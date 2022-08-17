@@ -1,0 +1,57 @@
+trigger:
+  - develop
+  - main
+
+pr:
+  branches:
+    exclude:
+      - '*'
+
+resources:
+  - repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'blindnet-acr'
+  imageRepository: 'storageconnjavademo'
+  containerRegistry: 'blindnet.azurecr.io'
+  dockerfilePath: 'example/Dockerfile'
+  branch: ${{ variables['Build.SourceBranchName'] }}
+  tag: '$(Build.BuildId)'
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    slot: 'production'
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'develop') }}:
+    slot: 'staging'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: |
+      apt-get update
+      apt-get install -y apt-transport-https
+      echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+      curl -sL https://packages.adoptium.net/artifactory/api/gpg/key/public | apt-key add -
+      apt-get update
+      apt-get install -y temurin-17-jdk maven
+    displayName: Install Java & Maven
+  - script: mvn package
+    displayName: Build & Package
+  - task: Docker@2
+    displayName: Build Docker image
+    inputs:
+      command: build
+      repository: $(imageRepository)
+      dockerfile: $(dockerfilePath)
+      containerRegistry: $(dockerRegistryServiceConnection)
+      tags: |
+        $(tag)
+        $(branch)
+  - task: Docker@2
+    displayName: Push Docker Image
+    inputs:
+      command: push
+      repository: $(imageRepository)
+      containerRegistry: $(dockerRegistryServiceConnection)
+      tags: |
+        $(tag)
+        $(branch)
