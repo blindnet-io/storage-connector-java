@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.blindnet.storageconnectors.java.exceptions.WebSocketException;
 import io.blindnet.storageconnectors.java.handlers.DataRequestHandler;
 import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
@@ -49,6 +50,7 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
         super(endpoint);
 
         objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .build();
     }
