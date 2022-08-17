@@ -28,7 +28,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class StorageConnectorImpl extends WebSocketClient implements StorageConnector {
-    private final static Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
+    private static final URI DEFAULT_ENDPOINT = URI.create("wss://blindnet-dac-staging.azurewebsites.net/v1/connectors/ws");
+
+    private static final Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
 
     private DataRequestHandler dataRequestHandler = new DefaultDataRequestHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
@@ -38,6 +40,10 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     private final ObjectMapper objectMapper;
 
     private long retryDelay = 1;
+
+    StorageConnectorImpl() {
+        this(DEFAULT_ENDPOINT);
+    }
 
     StorageConnectorImpl(URI endpoint) {
         super(endpoint);

@@ -9,6 +9,10 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 
 public interface StorageConnector {
+    static StorageConnector create() {
+        return new StorageConnectorImpl();
+    }
+
     static StorageConnector create(String endpoint) throws URISyntaxException {
         return create(new URI(endpoint));
     }

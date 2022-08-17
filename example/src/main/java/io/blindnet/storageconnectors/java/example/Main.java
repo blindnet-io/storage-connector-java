@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        StorageConnector.create("ws://127.0.0.1:8028/v1/connectors/ws")
+    public static void main(String[] args) {
+        StorageConnector.create()
                 .setDataRequestHandler(new MyRequestHandler())
                 .start();
     }
