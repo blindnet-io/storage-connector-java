@@ -1,5 +1,7 @@
 package io.blindnet.storageconnectors.java.datarequests.reply;
 
+import io.blindnet.storageconnectors.java.util.FailableConsumer;
+
 import java.util.function.Consumer;
 
 public class DataRequestReplyImpl implements DataRequestReply {

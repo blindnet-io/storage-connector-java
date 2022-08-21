@@ -14,7 +14,7 @@ public abstract class Logic {
         return connector;
     }
 
-    public abstract void run() throws WebSocketException;
+    public abstract void run() throws Exception;
 
     public void runCatch() {
         try {

@@ -1,5 +1,6 @@
 package io.blindnet.storageconnectors.java;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.blindnet.storageconnectors.java.handlers.DataRequestHandler;
 import io.blindnet.storageconnectors.java.handlers.ErrorHandler;
 
@@ -18,6 +19,9 @@ public interface StorageConnector {
     }
 
     static StorageConnector create(URI endpoint) {
+        if(!endpoint.getScheme().startsWith("http"))
+            throw new IllegalArgumentException("Invalid endpoint URI: not HTTP(S)");
+
         return new StorageConnectorImpl(endpoint);
     }
 
@@ -32,6 +36,10 @@ public interface StorageConnector {
     ExecutorService getExecutorService();
 
     StorageConnector setExecutorService(ExecutorService executorService);
+
+    JsonMapper getJsonMapper();
+
+    StorageConnector setJsonMapper(JsonMapper objectMapper);
 
     void start();
 

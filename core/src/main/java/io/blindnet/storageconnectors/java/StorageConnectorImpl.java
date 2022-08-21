@@ -2,7 +2,6 @@ package io.blindnet.storageconnectors.java;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.blindnet.storageconnectors.java.exceptions.WebSocketException;
@@ -15,6 +14,7 @@ import io.blindnet.storageconnectors.java.ws.WsInPacket;
 import io.blindnet.storageconnectors.java.ws.WsOutPacket;
 import io.blindnet.storageconnectors.java.ws.WsInPayload;
 import io.blindnet.storageconnectors.java.ws.WsOutPayload;
+import okhttp3.HttpUrl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -29,16 +30,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class StorageConnectorImpl extends WebSocketClient implements StorageConnector {
-    private static final URI DEFAULT_ENDPOINT = URI.create("wss://blindnet-dac-staging.azurewebsites.net/v1/connectors/ws");
+    private static final URI DEFAULT_ENDPOINT = URI.create("https://blindnet-dac-staging.azurewebsites.net");
 
     private static final Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
+
+    private final URI endpoint;
+    private final DataAccessClient dataAccessClient;
 
     private DataRequestHandler dataRequestHandler = new DefaultDataRequestHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
     private final Random random = new Random();
-    private final ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private long retryDelay = 1;
 
@@ -47,12 +51,23 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     StorageConnectorImpl(URI endpoint) {
-        super(endpoint);
+        super(URI.create(endpoint.toString().replaceFirst("http", "ws")).resolve("/v1/connectors/ws"));
 
-        objectMapper = JsonMapper.builder()
+        this.endpoint = endpoint;
+        this.dataAccessClient = new DataAccessClient(this);
+
+        jsonMapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .build();
+    }
+
+    public URI getEndpoint() {
+        return endpoint;
+    }
+
+    public DataAccessClient getDataAccessClient() {
+        return dataAccessClient;
     }
 
     @Override
@@ -89,6 +104,17 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
+    public JsonMapper getJsonMapper() {
+        return jsonMapper;
+    }
+
+    @Override
+    public StorageConnector setJsonMapper(JsonMapper objectMapper) {
+        this.jsonMapper = objectMapper;
+        return this;
+    }
+
+    @Override
     public void start() {
         connect();
     }
@@ -116,8 +142,8 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     @Override
     public void onMessage(ByteBuffer buf) {
         try {
-            WsInPayload payload = objectMapper.readValue(buf.array(), WsInPayload.class);
-            WsInPacket packet = payload.toPacket(objectMapper);
+            WsInPayload payload = jsonMapper.readValue(buf.array(), WsInPayload.class);
+            WsInPacket packet = payload.toPacket(jsonMapper);
             Logic logic = packet.getLogic(this);
             getExecutorService().execute(logic::runCatch);
         } catch (IOException e) {
@@ -150,7 +176,7 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     public <T extends WsOutPacket> void sendPacket(T packet) throws WebSocketException {
         try {
-            byte[] packetBytes = objectMapper.writeValueAsBytes(new WsOutPayload<T>(packet.getPacketType(), packet));
+            byte[] packetBytes = jsonMapper.writeValueAsBytes(new WsOutPayload<T>(packet.getPacketType(), packet));
             byte[] packetData = packet.getData();
 
             ByteBuffer buf = ByteBuffer.allocate(4 + packetBytes.length + (packetData != null ? packetData.length : 0));

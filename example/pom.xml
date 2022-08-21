@@ -14,10 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.blindnet</groupId>
             <artifactId>storage-connector-java</artifactId>
             <version>1.0-SNAPSHOT</version>
