@@ -49,7 +49,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>io.blindnet.storageconnectors.java.example.Main</mainClass>
+                            <mainClass>io.blindnet.storageconnector.example.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
