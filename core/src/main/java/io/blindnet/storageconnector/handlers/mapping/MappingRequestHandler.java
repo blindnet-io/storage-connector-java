@@ -70,6 +70,7 @@ public abstract class MappingRequestHandler<T> implements DataRequestHandler {
                 Map<String, List<SelectorData>> data = new HashMap<>();
                 q.getSelectors().stream().distinct()
                         .flatMap(selector -> subjects.stream().map(subject -> mapSelector(subject, selector)))
+                        .filter(Objects::nonNull)
                         .forEach(d -> data.computeIfAbsent(d.getSelector(), x -> new ArrayList<>()).add(d));
 
                 Map<String, Object> output = new HashMap<>();
