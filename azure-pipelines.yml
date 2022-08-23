@@ -23,17 +23,19 @@ variables:
     slot: 'staging'
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-22.04'
 
 steps:
   - script: |
       sudo apt-get update
-      sudo apt-get install -y apt-transport-https
-      echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
-      curl -sL https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
-      sudo apt-get update
-      sudo apt-get install -y temurin-17-jdk maven
-    displayName: Install Java & Maven
+      sudo apt-get install -y maven
+    displayName: Install Maven
+  - task: JavaToolInstaller@0
+    displayName: Set Java version
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
   - script: mvn package
     displayName: Build & Package
   - task: Docker@2
