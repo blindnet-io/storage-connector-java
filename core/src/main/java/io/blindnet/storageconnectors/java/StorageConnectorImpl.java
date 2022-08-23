@@ -140,20 +140,15 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     }
 
     @Override
-    public void onMessage(ByteBuffer buf) {
+    public void onMessage(String message) {
         try {
-            WsInPayload payload = jsonMapper.readValue(buf.array(), WsInPayload.class);
+            WsInPayload payload = jsonMapper.readValue(message, WsInPayload.class);
             WsInPacket packet = payload.toPacket(jsonMapper);
             Logic logic = packet.getLogic(this);
             getExecutorService().execute(logic::runCatch);
         } catch (IOException e) {
             errorHandler.onError(new WebSocketException(e));
         }
-    }
-
-    @Override
-    public void onMessage(String message) {
-        onMessage(ByteBuffer.wrap(message.getBytes()));
     }
 
     @Override
@@ -176,16 +171,7 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     public <T extends WsOutPacket> void sendPacket(T packet) throws WebSocketException {
         try {
-            byte[] packetBytes = jsonMapper.writeValueAsBytes(new WsOutPayload<T>(packet.getPacketType(), packet));
-            byte[] packetData = packet.getData();
-
-            ByteBuffer buf = ByteBuffer.allocate(4 + packetBytes.length + (packetData != null ? packetData.length : 0));
-            buf.putInt(packetBytes.length);
-            buf.put(packetBytes);
-            if(packetData != null) buf.put(packetData);
-            buf.position(0);
-
-            send(buf);
+            send(jsonMapper.writeValueAsString(new WsOutPayload<T>(packet.getPacketType(), packet)));
         } catch (JsonProcessingException e) {
             throw new WebSocketException(e);
         }
