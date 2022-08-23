@@ -1,28 +1,38 @@
 package io.blindnet.storageconnectors.java.example;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class User {
-    private final String name;
-
-    public User(String name) {
-        this.name = name;
+public record User(String firstName, String lastName, String email, byte[] proof) {
+    public String fullName() {
+        return firstName() + " " + lastName();
     }
 
-    public String getName() {
-        return name;
+    public interface Dao {
+        @SqlUpdate("CREATE TABLE users (first_name varchar, last_name varchar, email varchar, proof varbinary)")
+        void createTable();
+
+        @SqlUpdate("INSERT INTO users (first_name, last_name, email, proof) VALUES (?, ?, ?, ?)")
+        void insert(String firstName, String lastName, String email, byte[] proof);
+
+        @SqlQuery("SELECT * FROM users WHERE email=?")
+        User findByEmail(String email);
     }
 
-    public byte[] getProfilePicture() throws IOException {
-        try (Response res = new OkHttpClient().newCall(new Request.Builder()
-                .url("https://picsum.photos/seed/picsum/500").build()).execute()) {
-            return Objects.requireNonNull(res.body()).bytes();
+    public static class Mapper implements RowMapper<User> {
+        @Override
+        public User map(ResultSet rs, StatementContext ctx) throws SQLException {
+            return new User(
+                    rs.getString("first_name"),
+                    rs.getString("last_name"),
+                    rs.getString("email"),
+                    rs.getBytes("proof")
+            );
         }
     }
 }

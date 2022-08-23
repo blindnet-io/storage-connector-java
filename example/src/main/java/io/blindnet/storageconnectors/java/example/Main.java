@@ -4,15 +4,19 @@ import io.blindnet.storageconnectors.java.StorageConnector;
 import io.blindnet.storageconnectors.java.datarequests.reply.BinaryData;
 import io.blindnet.storageconnectors.java.handlers.mapping.MappingRequestHandler;
 
-public class Main {
-    private static final User DEMO_USER = new User("John Doe");
+import java.io.IOException;
+import java.net.URISyntaxException;
 
-    public static void main(String[] args) {
+public class Main {
+    public static void main(String[] args) throws IOException {
+        Database.init();
+
         StorageConnector.create()
                 .setDataRequestHandler(new MappingRequestHandler.Builder<User>()
-                        .setSubjectMapper(id -> DEMO_USER)
-                        .addSelectorType("NAME", User::getName)
-                        .addSelectorTypeBinary("IMAGE", u -> BinaryData.fromArray(u.getProfilePicture()))
+                        .setSubjectMapper(Database.users::findByEmail)
+                        .addSelectorType("CONTACT.EMAIL", User::email)
+                        .addSelectorType("NAME", User::fullName)
+                        .addSelectorTypeBinary("OTHER-DATA.PROOF", u -> BinaryData.fromArray(u.proof()))
                         .build())
                 .start();
     }
