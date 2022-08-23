@@ -11,10 +11,9 @@ import io.blindnet.storageconnectors.java.handlers.defaults.DefaultDataRequestHa
 import io.blindnet.storageconnectors.java.handlers.defaults.DefaultErrorHandler;
 import io.blindnet.storageconnectors.java.logic.Logic;
 import io.blindnet.storageconnectors.java.ws.WsInPacket;
-import io.blindnet.storageconnectors.java.ws.WsOutPacket;
 import io.blindnet.storageconnectors.java.ws.WsInPayload;
+import io.blindnet.storageconnectors.java.ws.WsOutPacket;
 import io.blindnet.storageconnectors.java.ws.WsOutPayload;
-import okhttp3.HttpUrl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -22,8 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
