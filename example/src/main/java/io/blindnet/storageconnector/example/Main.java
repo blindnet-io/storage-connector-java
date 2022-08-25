@@ -3,6 +3,10 @@ package io.blindnet.storageconnector.example;
 import io.blindnet.storageconnector.StorageConnector;
 import io.blindnet.storageconnector.datarequests.reply.BinaryData;
 import io.blindnet.storageconnector.handlers.mapping.MappingRequestHandler;
+import io.javalin.Javalin;
+import io.javalin.http.HttpCode;
+import io.javalin.http.UploadedFile;
+import io.javalin.plugin.json.JavalinJackson;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,5 +23,20 @@ public class Main {
                         .addSelectorTypeBinary("OTHER-DATA.PROOF", u -> BinaryData.fromArray(u.proof()))
                         .build())
                 .start();
+
+        Javalin app = Javalin.create(config -> config.jsonMapper(new JavalinJackson())).start(8082);
+        app.post("/form", ctx -> {
+            String firstName = ctx.formParam("first");
+            String lastName = ctx.formParam("last");
+            String email = ctx.formParam("email");
+            UploadedFile proof = ctx.uploadedFile("proof");
+            if(firstName == null || lastName == null || email == null || proof == null) {
+                ctx.status(HttpCode.BAD_REQUEST);
+                return;
+            }
+
+            Database.users.insert(firstName, lastName, email, proof.getContent().readAllBytes());
+            ctx.status(HttpCode.NO_CONTENT);
+        });
     }
 }

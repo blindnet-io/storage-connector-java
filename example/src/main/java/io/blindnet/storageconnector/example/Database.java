@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Database {
-    private static Jdbi jdbi;
-
     public static User.Dao users;
 
     static void init() throws IOException {
-        jdbi = Jdbi.create("jdbc:h2:mem:blindnet;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false");
+        Jdbi jdbi = Jdbi.create("jdbc:h2:mem:blindnet;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false");
         jdbi.installPlugin(new SqlObjectPlugin());
 
         jdbi.registerRowMapper(new User.Mapper());
