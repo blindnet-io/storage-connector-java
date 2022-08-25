@@ -10,7 +10,10 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 
 public interface StorageConnector {
-    static StorageConnector create() {
+    static StorageConnector create() throws URISyntaxException {
+        String env = System.getenv().get("BN_CONNECTOR_ENDPOINT");
+        if(env != null) return create(env);
+
         return new StorageConnectorImpl();
     }
 
