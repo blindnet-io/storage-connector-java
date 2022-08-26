@@ -12,6 +12,7 @@ resources:
 
 variables:
   dockerRegistryServiceConnection: 'blindnet-acr'
+  subscriptionServiceConnection: 'blindnet-dac-arm'
   imageRepository: 'storageconnjavademo'
   containerRegistry: 'blindnet.azurecr.io'
   dockerfilePath: 'example/Dockerfile'
@@ -57,3 +58,12 @@ steps:
       tags: |
         $(tag)
         $(branch)
+  - task: AzureWebAppContainer@1
+    displayName: Deploy
+    inputs:
+      azureSubscription: $(subscriptionServiceConnection)
+      appName: 'blindnet-connector-demo'
+      imageName: $(containerRegistry)/$(imageRepository):$(tag)
+      resourceGroupName: 'data-access-component'
+      deployToSlotOrASE: true
+      slotName: $(slot)
