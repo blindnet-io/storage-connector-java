@@ -24,7 +24,11 @@ public class Main {
                         .build())
                 .start();
 
-        Javalin app = Javalin.create(config -> config.jsonMapper(new JavalinJackson())).start(8082);
+        Javalin app = Javalin.create(config -> {
+            config.enableCorsForAllOrigins();
+            config.jsonMapper(new JavalinJackson());
+        }).start(8082);
+
         app.post("/form", ctx -> {
             String firstName = ctx.formParam("first");
             String lastName = ctx.formParam("last");
