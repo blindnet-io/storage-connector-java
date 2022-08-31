@@ -19,7 +19,7 @@ public abstract class Logic {
         try {
             run();
         } catch(Exception e) {
-            getConnector().onError(e);
+            getConnector().getErrorHandler().onError(e);
         }
     }
 }

@@ -24,7 +24,7 @@ public class DataQueryLogic extends Logic {
     public void run() throws Exception {
         DataRequestReply reply = getConnector().getDataRequestHandler().handle(packet.getRequest(), getConnector());
 
-        getConnector().sendPacket(new OutPacketDataRequestReply(packet.getRequest().getRequestId(), reply.getType()));
+        getConnector().getDataAccessClient().sendPacket(new OutPacketDataRequestReply(packet.getRequest().getRequestId(), reply.getType()));
 
         if(packet.getRequest().getAction() == DataRequest.Action.GET && reply.getDataCallbackConsumer() != null) {
             reply.getDataCallbackConsumer().accept(new DataRequestCallback() {

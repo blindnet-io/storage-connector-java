@@ -10,23 +10,17 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 
 public interface StorageConnector {
-    static StorageConnector create() throws URISyntaxException {
-        String env = System.getenv().get("BN_CONNECTOR_ENDPOINT");
-        if(env != null) return create(env);
-
-        return new StorageConnectorImpl();
+    static StorageConnector create(String appId) throws URISyntaxException {
+        return new StorageConnectorImpl(appId);
     }
 
-    static StorageConnector create(String endpoint) throws URISyntaxException {
-        return create(new URI(endpoint));
-    }
+    String getAppId();
 
-    static StorageConnector create(URI endpoint) {
-        if(!endpoint.getScheme().startsWith("http"))
-            throw new IllegalArgumentException("Invalid endpoint URI: not HTTP(S)");
+    URI getEndpoint();
 
-        return new StorageConnectorImpl(endpoint);
-    }
+    void setEndpoint(String endpoint) throws URISyntaxException;
+
+    void setEndpoint(URI endpoint);
 
     DataRequestHandler getDataRequestHandler();
 

@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) throws IOException, URISyntaxException {
         Database.init();
 
-        StorageConnector.create()
+        StorageConnector.create("97c4cb50-0de9-41b6-9e22-957c8aed8e5e")
                 .setDataRequestHandler(new MappingRequestHandler.Builder<User>()
                         .setSubjectMapper(Database.users::findByEmail)
                         .addSelectorType("CONTACT.EMAIL", User::email)

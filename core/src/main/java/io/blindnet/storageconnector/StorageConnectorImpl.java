@@ -21,18 +21,20 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class StorageConnectorImpl extends WebSocketClient implements StorageConnector {
+public class StorageConnectorImpl implements StorageConnector {
     private static final URI DEFAULT_ENDPOINT = URI.create("https://blindnet-dac-staging.azurewebsites.net");
 
     private static final Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
 
-    private final URI endpoint;
-    private final DataAccessClient dataAccessClient;
+    private final String appId;
+    private URI endpoint;
+    private DataAccessClient dataAccessClient;
 
     private DataRequestHandler dataRequestHandler = new DefaultDataRequestHandler();
     private ErrorHandler errorHandler = new DefaultErrorHandler();
@@ -41,17 +43,9 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
     private final Random random = new Random();
     private JsonMapper jsonMapper;
 
-    private long retryDelay = 1;
-
-    StorageConnectorImpl() {
-        this(DEFAULT_ENDPOINT);
-    }
-
-    StorageConnectorImpl(URI endpoint) {
-        super(URI.create(endpoint.toString().replaceFirst("http", "ws")).resolve("/v1/connectors/ws"));
-
-        this.endpoint = endpoint;
-        this.dataAccessClient = new DataAccessClient(this);
+    StorageConnectorImpl(String appId) throws URISyntaxException {
+        this.appId = appId;
+        this.endpoint = getDefaultEndpoint();
 
         jsonMapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
@@ -59,8 +53,37 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
                 .build();
     }
 
+    @Override
+    public String getAppId() {
+        return appId;
+    }
+
+    private static URI getDefaultEndpoint() throws URISyntaxException {
+        String env = System.getenv().get("BN_CONNECTOR_ENDPOINT");
+        if(env != null) return new URI(env);
+        else return DEFAULT_ENDPOINT;
+    }
+
+    @Override
+    public void setEndpoint(String endpoint) throws URISyntaxException {
+        setEndpoint(new URI(endpoint));
+    }
+
+    @Override
+    public void setEndpoint(URI endpoint) {
+        if(dataAccessClient != null)
+            throw new IllegalStateException("Can't set endpoint after connector start");
+
+        this.endpoint = endpoint;
+    }
+
+    @Override
     public URI getEndpoint() {
         return endpoint;
+    }
+
+    public Random getRandom() {
+        return random;
     }
 
     public DataAccessClient getDataAccessClient() {
@@ -113,64 +136,20 @@ public class StorageConnectorImpl extends WebSocketClient implements StorageConn
 
     @Override
     public void start() {
-        connect();
+        if(dataAccessClient != null)
+            throw new IllegalStateException("Connector already started");
+
+        dataAccessClient = new DataAccessClient(this);
+        dataAccessClient.ws().connect();
     }
 
     @Override
     public void startBlocking() throws IOException, InterruptedException {
-        if(!connectBlocking())
+        if(dataAccessClient != null)
+            throw new IllegalStateException("Connector already started");
+
+        dataAccessClient = new DataAccessClient(this);
+        if(!dataAccessClient.ws().connectBlocking())
             throw new IOException("Initial WebSocket connection failed");
-    }
-
-    @Override
-    public void connect() {
-        logger.info("Connecting to WebSocket");
-
-        super.connect();
-    }
-
-    @Override
-    public void onOpen(ServerHandshake handshake) {
-        logger.info("WebSocket connection established");
-
-        retryDelay = 1;
-    }
-
-    @Override
-    public void onMessage(String message) {
-        try {
-            WsInPayload payload = jsonMapper.readValue(message, WsInPayload.class);
-            WsInPacket packet = payload.toPacket(jsonMapper);
-            Logic logic = packet.getLogic(this);
-            getExecutorService().execute(logic::runCatch);
-        } catch (IOException e) {
-            errorHandler.onError(new WebSocketException(e));
-        }
-    }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        logger.error("WebSocket connection closed, reconnecting in " + (retryDelay / 1000) + "s");
-
-        Executors.newSingleThreadScheduledExecutor()
-                .schedule(this::reconnect, retryDelay, TimeUnit.MILLISECONDS);
-
-        if(!System.getenv().containsKey("DISABLE_RETRY_BACKOFF")) {
-            if(retryDelay < 15000)
-                retryDelay += random.nextInt(1000);
-        }
-    }
-
-    @Override
-    public void onError(Exception e) {
-        errorHandler.onError(new WebSocketException(e));
-    }
-
-    public <T extends WsOutPacket> void sendPacket(T packet) throws WebSocketException {
-        try {
-            send(jsonMapper.writeValueAsString(new WsOutPayload<T>(packet.getPacketType(), packet)));
-        } catch (JsonProcessingException e) {
-            throw new WebSocketException(e);
-        }
     }
 }
