@@ -34,7 +34,16 @@ TODO
 
 ## Usage
 
-TODO
+### Running the demo
+
+Build both the library and the demo by running `mvn package` in the root directory of this repo.
+You can find the demo application JAR file in the `example/target` directory.
+
+Run the demo: `java -jar storage-connector-java-example-1.0-SNAPSHOT-jar-with-dependencies.jar`.
+
+The demo application does not expose any additional configuration, but the connector library supports overriding
+the Data Access Component API URL with the `BN_CONNECTOR_ENDPOINT` environment variable, which can be
+useful in a development environment.
 
 ## Contributing
 
