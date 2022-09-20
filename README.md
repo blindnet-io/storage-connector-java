@@ -30,7 +30,7 @@ TODO
 
 ## Get Started
 
-:rocket: Check out our [Quick Start Guide](https://blindnet.dev/docs/quickstart) to get started in a snap.
+:rocket: Check out our [Tutorial](https://blindnet.dev/docs/tutorial) to get started in a snap.
 
 ## Usage
 
