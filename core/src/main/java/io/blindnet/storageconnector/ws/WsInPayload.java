@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.blindnet.storageconnector.exceptions.WebSocketException;
 import io.blindnet.storageconnector.ws.packets.InPacketDataRequest;
+import io.blindnet.storageconnector.ws.packets.InPacketWelcome;
 
 import java.io.IOException;
 
@@ -33,6 +34,8 @@ public class WsInPayload {
         switch(type) {
             case "data_request":
                 return mapper.treeToValue(data, InPacketDataRequest.class);
+            case "welcome":
+                return mapper.treeToValue(data, InPacketWelcome.class);
             default:
                 throw new WebSocketException("Unknown WS packet type");
         }

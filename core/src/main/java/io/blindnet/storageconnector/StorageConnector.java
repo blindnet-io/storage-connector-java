@@ -10,11 +10,11 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
 
 public interface StorageConnector {
-    static StorageConnector create(String appId) throws URISyntaxException {
-        return new StorageConnectorImpl(appId);
+    static StorageConnector create(String token) throws URISyntaxException {
+        return new StorageConnectorImpl(token);
     }
 
-    String getAppId();
+    String getToken();
 
     URI getEndpoint();
 

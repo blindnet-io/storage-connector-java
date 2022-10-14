@@ -1,21 +1,12 @@
 package io.blindnet.storageconnector;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.blindnet.storageconnector.exceptions.WebSocketException;
 import io.blindnet.storageconnector.handlers.DataRequestHandler;
-import io.blindnet.storageconnector.logic.Logic;
-import io.blindnet.storageconnector.ws.WsInPacket;
-import io.blindnet.storageconnector.ws.WsInPayload;
-import io.blindnet.storageconnector.ws.WsOutPacket;
-import io.blindnet.storageconnector.ws.WsOutPayload;
 import io.blindnet.storageconnector.handlers.ErrorHandler;
 import io.blindnet.storageconnector.handlers.defaults.DefaultDataRequestHandler;
 import io.blindnet.storageconnector.handlers.defaults.DefaultErrorHandler;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +16,13 @@ import java.net.URISyntaxException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class StorageConnectorImpl implements StorageConnector {
     private static final URI DEFAULT_ENDPOINT = URI.create("https://blindnet-dac-staging.azurewebsites.net");
 
     private static final Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
 
-    private final String appId;
+    private final String token;
     private URI endpoint;
     private DataAccessClient dataAccessClient;
 
@@ -43,8 +33,8 @@ public class StorageConnectorImpl implements StorageConnector {
     private final Random random = new Random();
     private JsonMapper jsonMapper;
 
-    StorageConnectorImpl(String appId) throws URISyntaxException {
-        this.appId = appId;
+    StorageConnectorImpl(String token) throws URISyntaxException {
+        this.token = token;
         this.endpoint = getDefaultEndpoint();
 
         jsonMapper = JsonMapper.builder()
@@ -54,8 +44,8 @@ public class StorageConnectorImpl implements StorageConnector {
     }
 
     @Override
-    public String getAppId() {
-        return appId;
+    public String getToken() {
+        return token;
     }
 
     private static URI getDefaultEndpoint() throws URISyntaxException {

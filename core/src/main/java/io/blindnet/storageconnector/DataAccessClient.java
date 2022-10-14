@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,8 @@ public class DataAccessClient {
 
         ws = new WebSocketClientImpl(
                 URI.create(connector.getEndpoint().toString().replaceFirst("http", "ws"))
-                        .resolve("/v1/connectors/ws/" + connector.getAppId())
+                        .resolve("/v1/connectors/ws"),
+                connector.getToken()
         );
     }
 
@@ -58,7 +60,8 @@ public class DataAccessClient {
     private Request.Builder mkRequest(String endpoint) throws APIException {
         try {
             return new Request.Builder()
-                    .url(connector.getEndpoint().resolve(endpoint).toURL());
+                    .url(connector.getEndpoint().resolve(endpoint).toURL())
+                    .header("Authorization", "Bearer " + connector.getToken());
         } catch (MalformedURLException e) {
             throw new APIException(e);
         }
@@ -92,13 +95,13 @@ public class DataAccessClient {
     }
 
     private String uploadData(String requestId, byte[] data, String type) throws APIException {
-        return run(mkRequest("/v1/connectors/data/" + connector.getAppId() + "/" + requestId + "/" + type + "?last=true")
+        return run(mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
                 .post(RequestBody.create(data, MediaType.get("application/octet-stream")))
                 .build(), String.class);
     }
 
     private String uploadData(String requestId, InputStream data, String type) throws APIException {
-        return run(mkRequest("/v1/connectors/data/" + connector.getAppId() + "/" + requestId + "/" + type + "?last=true")
+        return run(mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
                 .post(new RequestBody() {
                     @Override
                     public MediaType contentType() {
@@ -133,8 +136,8 @@ public class DataAccessClient {
 
         private long retryDelay = 1;
 
-        public WebSocketClientImpl(URI endpoint) {
-            super(endpoint);
+        public WebSocketClientImpl(URI endpoint, String token) {
+            super(endpoint, Map.of("Authorization", "Bearer " + token));
         }
 
         @Override
@@ -165,7 +168,7 @@ public class DataAccessClient {
 
         @Override
         public void onClose(int code, String reason, boolean remote) {
-            logger.error("WebSocket connection closed, reconnecting in " + (retryDelay / 1000) + "s");
+            logger.error("WebSocket connection closed (" + reason + "), reconnecting in " + (retryDelay / 1000) + "s");
 
             Executors.newSingleThreadScheduledExecutor()
                     .schedule(this::reconnect, retryDelay, TimeUnit.MILLISECONDS);

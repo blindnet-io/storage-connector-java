@@ -12,10 +12,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class Main {
+    private static final String TOKEN = "L5lm89XMUusdDK1SoufSYZ208Y5BIhZOL8SEhSNfSYMc6vmjfbTEEWhhRKBhDUcaojQFRUE8dtk1H0WKAs1AHInihH4DUdugbQfH49MsMKJ9h19c3UUBMMZKblZwKdYw";
+
     public static void main(String[] args) throws IOException, URISyntaxException {
         Database.init();
 
-        StorageConnector.create("97c4cb50-0de9-41b6-9e22-957c8aed8e5e")
+        StorageConnector.create(TOKEN)
                 .setDataRequestHandler(new MappingRequestHandler.Builder<User>()
                         .setSubjectMapper(Database.users::findByEmail)
                         .addSelectorType("CONTACT.EMAIL", User::email)
