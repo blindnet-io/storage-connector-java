@@ -22,5 +22,12 @@ steps:
     inputs:
       mavenServiceConnections: 'blindnet-maven-snapshots'
   - task: Maven@3
+    displayName: 'Deploy parent'
     inputs:
+      goals: 'deploy'
+      options: '-N'
+  - task: Maven@3
+    displayName: 'Deploy core'
+    inputs:
+      mavenPomFile: 'core/pom.xml'
       goals: 'javadoc:jar source:jar deploy'
