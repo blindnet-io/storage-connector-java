@@ -6,7 +6,7 @@
 
     <groupId>io.blindnet</groupId>
     <artifactId>storage-connector-java-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -71,4 +71,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>blindnet-snapshots</id>
+            <url>https://nexus.blindnet.io/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

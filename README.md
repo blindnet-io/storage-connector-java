@@ -32,6 +32,35 @@ TODO
 
 :rocket: Check out our [Tutorial](https://blindnet.dev/docs/tutorial) to get started in a snap.
 
+## Installation
+
+Add the library to your project's dependencies:
+
+### Maven
+
+```xml
+<repository>
+    <id>blindnet-snapshots</id>
+    <url>https://nexus.blindnet.io/repository/maven-snapshots</url>
+</repository>
+
+<dependency>
+    <groupId>io.blindnet</groupId>
+    <artifactId>storage-connector-java</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Gradle
+
+```kotlin
+maven {
+    url = uri("https://nexus.blindnet.io/repository/maven-snapshots")
+}
+
+implementation("io.blindnet:storage-connector-java:1.0.0-SNAPSHOT")
+```
+
 ## Usage
 
 ### Running the demo

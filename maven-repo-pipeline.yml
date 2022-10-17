@@ -1,0 +1,26 @@
+trigger:
+  - develop
+
+pr:
+  branches:
+    exclude:
+      - '*'
+
+resources:
+  - repo: self
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '8'
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
+  - task: MavenAuthenticate@0
+    inputs:
+      mavenServiceConnections: 'blindnet-maven-snapshots'
+  - task: Maven@3
+    inputs:
+      goals: 'javadoc:jar source:jar deploy'
