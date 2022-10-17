@@ -121,7 +121,7 @@ public abstract class MappingRequestHandler<T> implements DataRequestHandler {
         public MappingRequestHandler<T> build() {
             Objects.requireNonNull(subjectMapper, "subjectMapper not set");
 
-            return new MappingRequestHandler<>(selectorTypes) {
+            return new MappingRequestHandler<T>(selectorTypes) {
                 @Override
                 protected T mapSubject(String id) {
                     return subjectMapper.apply(id);
