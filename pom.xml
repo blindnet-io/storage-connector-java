@@ -20,8 +20,20 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>blindnet-snapshots</id>
+            <url>https://nexus.blindnet.io/repository/maven-snapshots</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>auth0</artifactId>
+                <version>1.44.0</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
@@ -46,6 +58,11 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>4.10.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.blindnet</groupId>
+                <artifactId>jwt-java</artifactId>
+                <version>1.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>io.javalin</groupId>

@@ -1,9 +1,16 @@
 package io.blindnet.storageconnector.example;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.TextNode;
+import io.blindnet.jwt.TokenBuilder;
+import io.blindnet.jwt.TokenPrivateKey;
 import io.blindnet.storageconnector.StorageConnector;
 import io.blindnet.storageconnector.datarequests.reply.BinaryData;
 import io.blindnet.storageconnector.handlers.mapping.MappingRequestHandler;
 import io.javalin.Javalin;
+import io.javalin.core.JavalinConfig;
+import io.javalin.http.ContentType;
 import io.javalin.http.HttpCode;
 import io.javalin.http.UploadedFile;
 import io.javalin.plugin.json.JavalinJackson;
@@ -12,7 +19,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class Main {
-    private static final String TOKEN = "L5lm89XMUusdDK1SoufSYZ208Y5BIhZOL8SEhSNfSYMc6vmjfbTEEWhhRKBhDUcaojQFRUE8dtk1H0WKAs1AHInihH4DUdugbQfH49MsMKJ9h19c3UUBMMZKblZwKdYw";
+    private static final String TOKEN = System.getenv("BN_CONNECTOR_TOKEN");
+    private static final TokenBuilder tokenBuilder = new TokenBuilder(
+            System.getenv("APP_UUID"), TokenPrivateKey.fromString(System.getenv("APP_KEY"))
+    );
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         Database.init();
@@ -29,7 +39,19 @@ public class Main {
         Javalin app = Javalin.create(config -> {
             config.enableCorsForAllOrigins();
             config.jsonMapper(new JavalinJackson());
-        }).start(8082);
+        });
+
+        app.get("/auth/token", ctx -> {
+            String email;
+            try {
+                email = Auth0Utils.verifyTokenFromHeader(ctx.header("Authorization"));
+            } catch(IllegalArgumentException e) {
+                ctx.status(HttpCode.BAD_REQUEST);
+                return;
+            }
+
+            ctx.json(TextNode.valueOf(tokenBuilder.user(email)));
+        });
 
         app.post("/form", ctx -> {
             String firstName = ctx.formParam("first");
@@ -44,5 +66,7 @@ public class Main {
             Database.users.insert(firstName, lastName, email, proof.getContent().readAllBytes());
             ctx.status(HttpCode.NO_CONTENT);
         });
+
+        app.start(8082);
     }
 }
