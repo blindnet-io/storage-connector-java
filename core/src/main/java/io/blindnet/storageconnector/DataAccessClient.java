@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -137,7 +136,8 @@ public class DataAccessClient {
         private long retryDelay = 1;
 
         public WebSocketClientImpl(URI endpoint, String token) {
-            super(endpoint, Map.of("Authorization", "Bearer " + token));
+            super(endpoint);
+            addHeader("Authorization", "Bearer " + token);
         }
 
         @Override
