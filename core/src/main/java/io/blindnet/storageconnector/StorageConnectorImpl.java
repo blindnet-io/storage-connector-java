@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class StorageConnectorImpl implements StorageConnector {
-    private static final URI DEFAULT_ENDPOINT = URI.create("https://blindnet-dac-staging.azurewebsites.net");
+    private static final URI DEFAULT_ENDPOINT = URI.create("https://stage.storage.blindnet.io");
 
     private static final Logger logger = LoggerFactory.getLogger(StorageConnectorImpl.class);
 
