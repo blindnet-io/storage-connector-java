@@ -46,7 +46,8 @@ public class Main {
             try {
                 email = Auth0Utils.verifyTokenFromHeader(ctx.header("Authorization"));
             } catch(IllegalArgumentException e) {
-                ctx.status(HttpCode.BAD_REQUEST);
+                e.printStackTrace();
+                ctx.status(HttpCode.BAD_REQUEST).result(e.getMessage());
                 return;
             }
 
