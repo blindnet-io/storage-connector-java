@@ -25,10 +25,6 @@ public class Main {
     );
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        System.out.println(Auth0Utils.verifyTokenFromHeader("test"));
-
-        Runtime.getRuntime().exit(0);
-
         Database.init();
 
         StorageConnector.create(TOKEN)
