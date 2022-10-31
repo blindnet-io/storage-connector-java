@@ -25,6 +25,10 @@ public class Main {
     );
 
     public static void main(String[] args) throws IOException, URISyntaxException {
+        System.out.println(Auth0Utils.verifyTokenFromHeader("test"));
+
+        Runtime.getRuntime().exit(0);
+
         Database.init();
 
         StorageConnector.create(TOKEN)
@@ -51,6 +55,23 @@ public class Main {
             }
 
             ctx.json(TextNode.valueOf(tokenBuilder.user(email)));
+        });
+
+        app.post("/auth/admin/token", ctx -> {
+            AdminAuthPayload payload;
+            try {
+                payload = ctx.bodyAsClass(AdminAuthPayload.class);
+            } catch(Exception e) {
+                ctx.status(HttpCode.BAD_REQUEST);
+                return;
+            }
+
+            // Obviously, don't do that, and don't use that kind of password. This is a demo.
+            if(payload.username().equals("admin") && payload.password().equals("admin123")) {
+                ctx.json(TextNode.valueOf(tokenBuilder.app()));
+            } else {
+                ctx.status(HttpCode.UNAUTHORIZED);
+            }
         });
 
         app.post("/form", ctx -> {
