@@ -29,12 +29,12 @@ public class DataQueryLogic extends Logic {
         if(packet.getRequest().getAction() == DataRequest.Action.GET && reply.getDataCallbackConsumer() != null) {
             reply.getDataCallbackConsumer().accept(new DataRequestCallback() {
                 @Override
-                public String sendData(BinaryData data) throws APIException {
+                public void sendData(BinaryData data) throws APIException {
                     if(data.isArray()) {
-                        return getConnector().getDataAccessClient()
+                        getConnector().getDataAccessClient()
                                 .uploadMainData(packet.getRequest().getRequestId(), data.getArray());
                     } else {
-                        return getConnector().getDataAccessClient()
+                        getConnector().getDataAccessClient()
                                 .uploadMainData(packet.getRequest().getRequestId(), data.getStream());
                     }
                 }

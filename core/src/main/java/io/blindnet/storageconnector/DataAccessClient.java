@@ -67,40 +67,56 @@ public class DataAccessClient {
     }
 
     private <R> R run(Request request, Class<R> cl) throws APIException {
-        try (Response response = http.newCall(request).execute()) {
-            if(!response.isSuccessful())
-                throw new APIException("Status code " + response.code());
-
+        try (Response response = execute(request)) {
             return connector.getJsonMapper().readValue(Objects.requireNonNull(response.body()).bytes(), cl);
         } catch (IOException e) {
             throw new APIException(e);
         }
     }
 
-    public String uploadMainData(String requestId, byte[] data) throws APIException {
-        return uploadData(requestId, data, "main");
+    private void run(Request request) throws APIException {
+        execute(request).close();
     }
 
-    public String uploadMainData(String requestId, InputStream data) throws APIException {
-        return uploadData(requestId, data, "main");
+    private Response execute(Request request) throws APIException {
+        Response response;
+        try {
+            response = http.newCall(request).execute();
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
+
+        if(!response.isSuccessful()) {
+            response.close();
+            throw new APIException("Status code " + response.code());
+        }
+
+        return response;
+    }
+
+    public void uploadMainData(String requestId, byte[] data) throws APIException {
+        run(mkUploadData(requestId, data, "main").build());
+    }
+
+    public void uploadMainData(String requestId, InputStream data) throws APIException {
+        run(mkUploadData(requestId, data, "main").build());
     }
 
     public String uploadAdditionalData(String requestId, byte[] data) throws APIException {
-        return uploadData(requestId, data, "additional");
+        return run(mkUploadData(requestId, data, "additional").build(), String.class);
     }
 
     public String uploadAdditionalData(String requestId, InputStream data) throws APIException {
-        return uploadData(requestId, data, "additional");
+        return run(mkUploadData(requestId, data, "additional").build(), String.class);
     }
 
-    private String uploadData(String requestId, byte[] data, String type) throws APIException {
-        return run(mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
-                .post(RequestBody.create(data, MediaType.get("application/octet-stream")))
-                .build(), String.class);
+    private Request.Builder mkUploadData(String requestId, byte[] data, String type) throws APIException {
+        return mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
+                .post(RequestBody.create(data, MediaType.get("application/octet-stream")));
     }
 
-    private String uploadData(String requestId, InputStream data, String type) throws APIException {
-        return run(mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
+    private Request.Builder mkUploadData(String requestId, InputStream data, String type) throws APIException {
+        return mkRequest("/v1/connectors/data/" + requestId + "/" + type + "?last=true")
                 .post(new RequestBody() {
                     @Override
                     public MediaType contentType() {
@@ -118,8 +134,7 @@ public class DataAccessClient {
                             sink.writeAll(source);
                         }
                     }
-                })
-                .build(), String.class);
+                });
     }
 
     public <T extends WsOutPacket> void sendPacket(T packet) throws WebSocketException {
