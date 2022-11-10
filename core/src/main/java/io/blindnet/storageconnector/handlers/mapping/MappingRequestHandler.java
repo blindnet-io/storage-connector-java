@@ -1,14 +1,15 @@
 package io.blindnet.storageconnector.handlers.mapping;
 
+import io.blindnet.storageconnector.ConnectorRunner;
 import io.blindnet.storageconnector.StorageConnector;
 import io.blindnet.storageconnector.datarequests.DataRequest;
 import io.blindnet.storageconnector.datarequests.query.DataQuery;
 import io.blindnet.storageconnector.datarequests.reply.BinaryData;
-import io.blindnet.storageconnector.exceptions.APIException;
-import io.blindnet.storageconnector.util.FailableFunction;
 import io.blindnet.storageconnector.datarequests.reply.DataRequestCallback;
 import io.blindnet.storageconnector.datarequests.reply.DataRequestReply;
+import io.blindnet.storageconnector.exceptions.APIException;
 import io.blindnet.storageconnector.handlers.DataRequestHandler;
+import io.blindnet.storageconnector.util.FailableFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public abstract class MappingRequestHandler<T> implements DataRequestHandler {
     }
 
     @Override
-    public DataRequestReply handle(DataRequest request, StorageConnector connector) throws Exception {
+    public DataRequestReply handle(DataRequest request, StorageConnector connector, ConnectorRunner runner) throws Exception {
         DataQuery q = request.getQuery();
 
         List<T> subjects = q.getSubjects().stream().distinct().map(this::mapSubject)
@@ -83,7 +84,7 @@ public abstract class MappingRequestHandler<T> implements DataRequestHandler {
                                 .collect(Collectors.toList()));
                 }
 
-                callback.sendData(BinaryData.fromArray(connector.getJsonMapper().writeValueAsBytes(output)));
+                callback.sendData(BinaryData.fromArray(runner.getDataAccessClient().getJsonMapper().writeValueAsBytes(output)));
             });
         } else {
             for (T subject : subjects) {
@@ -133,11 +134,11 @@ public abstract class MappingRequestHandler<T> implements DataRequestHandler {
                 }
 
                 @Override
-                public DataRequestReply handle(DataRequest request, StorageConnector connector) throws Exception {
+                public DataRequestReply handle(DataRequest request, StorageConnector connector, ConnectorRunner runner) throws Exception {
                     if(request.getAction() == DataRequest.Action.DELETE && deleter == null)
                         return request.deny();
 
-                    return super.handle(request, connector);
+                    return super.handle(request, connector, runner);
                 }
             };
         }

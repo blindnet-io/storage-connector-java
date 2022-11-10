@@ -1,53 +1,45 @@
 package io.blindnet.storageconnector.ws.packets;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.blindnet.storageconnector.StorageConnectorImpl;
-import io.blindnet.storageconnector.datarequests.DataRequestImpl;
-import io.blindnet.storageconnector.logic.DataQueryLogic;
-import io.blindnet.storageconnector.logic.Logic;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.blindnet.storageconnector.ws.PacketHandler;
 import io.blindnet.storageconnector.ws.WsInPacket;
-import org.slf4j.LoggerFactory;
+import io.blindnet.storageconnector.ws.WsInPayload;
 
+import java.util.UUID;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class InPacketWelcome implements WsInPacket {
-    @JsonProperty("app_id")
-    private String appId;
-    @JsonProperty("namespace_id")
-    private String namespaceId;
-    @JsonProperty("namespace_name")
-    private String namespaceName;
+    private UUID appId;
+    private UUID connectorId;
+    private String connectorName;
 
-    public String getAppId() {
+    public UUID getAppId() {
         return appId;
     }
 
-    public void setAppId(String appId) {
+    public void setAppId(UUID appId) {
         this.appId = appId;
     }
 
-    public String getNamespaceId() {
-        return namespaceId;
+    public UUID getConnectorId() {
+        return connectorId;
     }
 
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
+    public void setConnectorId(UUID connectorId) {
+        this.connectorId = connectorId;
     }
 
-    public String getNamespaceName() {
-        return namespaceName;
+    public String getConnectorName() {
+        return connectorName;
     }
 
-    public void setNamespaceName(String namespaceName) {
-        this.namespaceName = namespaceName;
+    public void setConnectorName(String connectorName) {
+        this.connectorName = connectorName;
     }
 
     @Override
-    public Logic getLogic(StorageConnectorImpl connector) {
-        return new Logic(connector) {
-            @Override
-            public void run() throws Exception {
-                LoggerFactory.getLogger(InPacketWelcome.class).info("Application: {}", getAppId());
-                LoggerFactory.getLogger(InPacketWelcome.class).info("Namespace: {} - {}", getNamespaceId(), getNamespaceName());
-            }
-        };
+    public void callHandler(WsInPayload payload, PacketHandler handler) {
+        handler.handlePacket(payload, this);
     }
 }

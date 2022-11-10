@@ -1,44 +1,25 @@
 package io.blindnet.storageconnector;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import io.blindnet.storageconnector.handlers.DataRequestHandler;
-import io.blindnet.storageconnector.handlers.ErrorHandler;
-
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.ExecutorService;
+import java.util.UUID;
 
 public interface StorageConnector {
-    static StorageConnector create(String token) throws URISyntaxException {
-        return new StorageConnectorImpl(token);
+    static CustomStorageConnector create(String token) throws URISyntaxException {
+        return CustomStorageConnector.create(token);
     }
 
-    String getToken();
+    static CustomStorageConnector create(String token, String endpoint) throws URISyntaxException {
+        return CustomStorageConnector.create(token, endpoint);
+    }
 
-    URI getEndpoint();
+    static CustomStorageConnector create(String token, URI endpoint) {
+        return CustomStorageConnector.create(token, endpoint);
+    }
 
-    void setEndpoint(String endpoint) throws URISyntaxException;
+    UUID getApplicationId();
 
-    void setEndpoint(URI endpoint);
+    UUID getConnectorId();
 
-    DataRequestHandler getDataRequestHandler();
-
-    StorageConnector setDataRequestHandler(DataRequestHandler dataRequestHandler);
-
-    ErrorHandler getErrorHandler();
-
-    StorageConnector setErrorHandler(ErrorHandler errorHandler);
-
-    ExecutorService getExecutorService();
-
-    StorageConnector setExecutorService(ExecutorService executorService);
-
-    JsonMapper getJsonMapper();
-
-    StorageConnector setJsonMapper(JsonMapper objectMapper);
-
-    void start();
-
-    void startBlocking() throws IOException, InterruptedException;
+    String getConnectorName();
 }
