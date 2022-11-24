@@ -76,12 +76,12 @@ public class Main {
             String lastName = ctx.formParam("last");
             String email = ctx.formParam("email");
             UploadedFile proof = ctx.uploadedFile("proof");
-            if(firstName == null || lastName == null || email == null || proof == null) {
+            if(firstName == null || lastName == null || email == null) {
                 ctx.status(HttpCode.BAD_REQUEST);
                 return;
             }
 
-            Database.users.insert(firstName, lastName, email, proof.getContent().readAllBytes());
+            Database.users.upsert(email, firstName, lastName, proof != null ? proof.getContent().readAllBytes() : null);
             ctx.status(HttpCode.NO_CONTENT);
         });
 

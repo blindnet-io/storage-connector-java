@@ -16,7 +16,7 @@ public class Database {
         jdbi.registerRowMapper(new User.Mapper());
         users = jdbi.onDemand(User.Dao.class);
         users.createTable();
-        users.insert("John", "Doe", "john.doe@example.com",
+        users.upsert("john.doe@example.com", "John", "Doe",
                 Objects.requireNonNull(Database.class.getResourceAsStream("/john_doe_proof.pdf")).readAllBytes());
     }
 }
