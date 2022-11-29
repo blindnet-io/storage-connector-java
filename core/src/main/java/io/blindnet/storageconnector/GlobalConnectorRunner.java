@@ -7,7 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.function.Function;
 
-public interface GlobalConnectorRunner extends ConnectorRunner {
+public interface GlobalConnectorRunner extends ConnectorRunner<GlobalConnectorRunner> {
     static GlobalConnectorRunner create(String token) throws URISyntaxException {
         return create(token, DataAccessClient.getDefaultEndpoint());
     }

@@ -6,7 +6,7 @@ import io.blindnet.storageconnector.impl.CustomStorageConnectorImpl;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public interface CustomStorageConnector extends StorageConnector, ConnectorRunner {
+public interface CustomStorageConnector extends StorageConnector, ConnectorRunner<CustomStorageConnector> {
     static CustomStorageConnector create(String token) throws URISyntaxException {
         return create(token, DataAccessClient.getDefaultEndpoint());
     }

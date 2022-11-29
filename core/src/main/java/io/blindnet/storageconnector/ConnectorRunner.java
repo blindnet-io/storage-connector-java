@@ -6,31 +6,35 @@ import io.blindnet.storageconnector.handlers.ErrorHandler;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
-public interface ConnectorRunner {
+@SuppressWarnings("unchecked")
+public interface ConnectorRunner<T extends ConnectorRunner<T>> {
     DataAccessClient getDataAccessClient();
 
     default ErrorHandler getErrorHandler() {
         return getDataAccessClient().getErrorHandler();
     };
 
-    default DataAccessClient setErrorHandler(ErrorHandler errorHandler) {
+    default T setErrorHandler(ErrorHandler errorHandler) {
         getDataAccessClient().setErrorHandler(errorHandler);
+        return (T) this;
     }
 
     default ExecutorService getExecutorService() {
         return getDataAccessClient().getExecutorService();
     }
 
-    default DataAccessClient setExecutorService(ExecutorService executorService) {
+    default T setExecutorService(ExecutorService executorService) {
         getDataAccessClient().setExecutorService(executorService);
+        return (T) this;
     }
 
     default JsonMapper getJsonMapper() {
         return getDataAccessClient().getJsonMapper();
     }
 
-    default DataAccessClient setJsonMapper(JsonMapper objectMapper) {
+    default T setJsonMapper(JsonMapper objectMapper) {
         getDataAccessClient().setJsonMapper(objectMapper);
+        return (T) this;
     }
 
     default void start() {
