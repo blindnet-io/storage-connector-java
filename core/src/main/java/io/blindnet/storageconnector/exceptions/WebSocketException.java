@@ -1,8 +1,6 @@
 package io.blindnet.storageconnector.exceptions;
 
-import java.io.IOException;
-
-public class WebSocketException extends IOException {
+public class WebSocketException extends APIException {
     public WebSocketException(String message) {
         super(message);
     }

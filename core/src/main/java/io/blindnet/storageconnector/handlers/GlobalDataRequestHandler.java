@@ -1,10 +1,10 @@
 package io.blindnet.storageconnector.handlers;
 
 import io.blindnet.storageconnector.ConnectorRunner;
-import io.blindnet.storageconnector.StorageConnector;
+import io.blindnet.storageconnector.GlobalStorageConnector;
 import io.blindnet.storageconnector.datarequests.DataRequest;
 import io.blindnet.storageconnector.datarequests.reply.DataRequestReply;
 
-public interface DataRequestHandler {
-    DataRequestReply handle(DataRequest request, StorageConnector connector, ConnectorRunner runner) throws Exception;
+public interface GlobalDataRequestHandler {
+    DataRequestReply handle(DataRequest request, GlobalStorageConnector connector, ConnectorRunner runner) throws Exception;
 }
