@@ -35,6 +35,7 @@ public class GlobalConnectorRunnerImpl implements GlobalConnectorRunner, PacketH
 
     public GlobalConnectorRunnerImpl addHandlerFactory(String type, Function<String, GlobalDataRequestHandler> factory) {
         handlerFactories.put(type, factory);
+        dataAccessClient.getWebSocketClient().addHeader("X-Connector-Types", String.join(",", handlerFactories.keySet()));
         return this;
     }
 
